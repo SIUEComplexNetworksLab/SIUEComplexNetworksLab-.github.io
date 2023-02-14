@@ -5,7 +5,7 @@ const paddleHeight = grid * 5; // 80
 const maxPaddleY = canvas.height - grid - paddleHeight;
 
 var paddleSpeed = 6;
-var ballSpeed = 3;
+var ballSpeed = 4;
 var playerScore = 0;
 var computerScore = 0;
 
@@ -96,6 +96,19 @@ function loop() {
     ball.dy *= -1;
   }
 
+  var paddleMiddle = leftPaddle.y + leftPaddle.height / 2;
+  var distance = ball.y - paddleMiddle;
+
+  //paddle moves itself to play against human player
+    if (distance < 0) {
+        leftPaddle.dy = -(ballSpeed);
+    }   else if (distance > 0) {
+        leftPaddle.dy = ballSpeed;
+  }     else {
+        leftPaddle.dy = 0;
+  }
+
+
   // reset ball if it goes past paddle (but only if we haven't already done so)
   if ( (ball.x < 0 || ball.x > canvas.width) && !ball.resetting) {
     ball.resetting = true;
@@ -106,7 +119,7 @@ function loop() {
       document.getElementById("playerScore").innerHTML = playerScore;
 
     }
-  
+ 
     if(ball.x > canvas.width){
       computerScore += 1;
 
@@ -123,32 +136,49 @@ function loop() {
 
       }, 1000);
     }
-    //if either play has hit 7, does not reset ball, stopping game. 
+    //if either play has hit 7, does not reset ball, stopping game.
     else{
+      cancelAnimationFrame(loop);
+      ball.x = canvas.width / 2;
+      ball.y = canvas.height / 2;
+      ball.width = grid;
+      ball.height = grid;
+      ball.dx = 0;
+      ball.dy = 0;
       //sets winner text
       if(playerScore = 7){
-        winner = "player";
+        winner = "computer";
       }
       else{
-        winner = "computer";
+        winner = "player";
       }
       //sets end screen text
       document.getElementById("End Screen").innerHTML = "Game over, the " + winner + " wins!";
 
-      var endPopup = document.getElementById("End Popup");
-      var playAgain = document.getElementById("Play Again");
+      const modal = document.getElementById("End Popup");
+      const playAgain = document.getElementById("PlayAgain");
 
-      endPopup.style.display="block";
+      modal.style.display='block';
 
       //function called at end of game if player chooses to play again.
-      playAgain.addEventListener("click", playAgain);
+      playAgain.addEventListener('click', function(){
+        modal.style.display = 'none';
+        ball.resetting = false;
+        ball.x = canvas.width / 2;
+        ball.y = canvas.height / 2;
+        ball.width = grid;
+        ball.height = grid;
+        ball.dx = ballSpeed;
+        ball.dy = -ballSpeed;
+        computerScore = 0;
+        playerScore = 0;
+        document.getElementById("computerScore").innerHTML = computerScore;
+        document.getElementById("playerScore").innerHTML = playerScore;
+
+    });
     }
   }
-  //Restarts game 
-  function playAgain(){
-    endPopup.style.display = "none";
-    initialGame();
-  }
+
 
   // check to see if ball collides with paddle. if they do change x velocity
   if (collides(ball, leftPaddle)) {
@@ -192,6 +222,7 @@ document.addEventListener('keydown', function(e) {
     rightPaddle.dy = paddleSpeed;
   }
 
+/* Removing function and adding computer
   // w key
   if (e.which === 87) {
     leftPaddle.dy = -paddleSpeed;
@@ -199,7 +230,7 @@ document.addEventListener('keydown', function(e) {
   // a key
   else if (e.which === 83) {
     leftPaddle.dy = paddleSpeed;
-  }
+  }*/
 });
 
 // listen to keyboard events to stop the paddle if key is released
